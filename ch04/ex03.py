@@ -10,9 +10,17 @@ from ch03.ex11 import forward
 from dataset.mnist import load_mnist
 
 
-def cross_entropy(y_pred, y_true):
+def _cross_entropy(y_pred, y_true):
     delta = 1e-7  # log0 = -inf가 되는 것을 방지하기 위해 더해줄 값
     return -np.sum(y_true * np.log(y_pred + delta))
+
+
+def cross_entropy(y_pred, y_true):
+    if y_pred.ndim == 1:
+        ce = _cross_entropy(y_pred, y_true)
+    elif y_pred.ndim == 2:
+        ce = _cross_entropy(y_pred, y_true) / len(y_pred)
+    return ce
 
 
 if __name__ == '__main__':
@@ -34,5 +42,13 @@ if __name__ == '__main__':
     # 실제값과 예측값이 다른 경우
     print('ce =', cross_entropy(y_pred[8], y_true[8]))  # 4.9094
 
-    print(cross_entropy(y_pred[:1], y_true[:1]))
+    print('ce 평균 =', cross_entropy(y_pred, y_true))  # 0.5206
+
+    np.random.seed(1227)
+    y_true = np.random.randint(10, size=10)
+    print('y_true =', y_true)
+    y_true_2 = np.zeros((y_true.size, 10))
+    for i in range(y_true.size):
+        y_true_2[i][y_true[i]] = 1
+    print(y_true_2)
 
