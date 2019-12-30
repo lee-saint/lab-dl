@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def numerical_diff(fn, x):
@@ -18,14 +19,17 @@ def f1_prime(x):
 
 def f2(x):
     """x = [x1, x2, ...]"""
-    return np.sum(x**2)  # x0**2 + x1**2
+    if x.ndim == 1:
+        return np.sum(x**2)  # x0**2 + x1**2
+    else:
+        return np.sum(x**2, axis=1)
 
 
-def numerical_gradient(fn, x):
+def _numerical_gradient(fn, x):
     """점 x = [x0, x1, ..., xn]에서의
-    함수 fn = fn(x0, x1, ..., xn)의 각 편미분(partial defferential) 값 배열을 리턴
+    함수 fn = fn(x0, x1, ..., xn)의 각 편미분(partial differential) 값 배열을 리턴
     """
-    x = x.astype(np.float)  # 실수 타입
+    x = x.astype(np.float, copy=False)  # 실수 타입
     gradient = np.zeros_like(x)  # np.zeros(x.shape)
     h = 1e-4  # 0.0001
     for i in range(x.size):
@@ -37,6 +41,23 @@ def numerical_gradient(fn, x):
         gradient[i] = (fh1 - fh2) / (2 * h)
         x[i] = ith_value
     return gradient
+
+
+def numerical_gradient(fn, X):
+    """x = [
+        [x11 x12 x13 ...],
+        [x21 x22 x23 ...]
+        ...
+    ]"""
+    if X.ndim == 1:
+        return _numerical_gradient(fn, X)
+    else:
+        grad = np.zeros_like(X)
+
+        for idx, x in enumerate(X):
+            grad[idx] = _numerical_gradient(fn, x)
+
+        return grad
 
 
 def f3(x):
@@ -72,3 +93,26 @@ if __name__ == '__main__':
     # 점 (1, 2)에서의 df/dx0 = 4, df/dx1 = 5
     gradient = numerical_gradient(f4, np.array([1, 2]))
     print(gradient)
+
+    x0 = np.arange(-2, 2.5, 0.25)
+    x1 = np.arange(-2, 2.5, 0.25)
+    X, Y = np.meshgrid(x0, x1)
+
+    X = X.flatten()
+    Y = Y.flatten()
+
+    # print(np.array([X, Y]))
+
+    grad = numerical_gradient(f2, np.array([X, Y]))
+    # print(grad)
+
+    plt.figure()
+    plt.quiver(X, Y, -grad[0], -grad[1], angles="xy", color="666666")
+    plt.xlim([-2, 2])
+    plt.ylim([-2, 2])
+    plt.xlabel('x0')
+    plt.ylabel('x1')
+    plt.grid()
+    plt.legend()
+    plt.draw()
+    plt.show()
