@@ -15,9 +15,9 @@ class Relu:
         return np.maximum(0, x)
 
     def backward(self, dout):
-        print('masking 전:', dout)
+        # print('masking 전:', dout)
         dout[self.mask] = 0
-        print('masking 후:', dout)
+        # print('masking 후:', dout)
         dx = dout
         return dx
 

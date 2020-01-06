@@ -18,8 +18,8 @@ class Affine:
         # b 행렬 방향으로의 gradient
         self.db = np.sum(dout, axis=0)
         # Z 행렬 방향으로의 gradient -> W방향, X방향
-        self.dW = X.T.dot(dout)  # GD를 사용해서 W, b를 fitting할 때 사용
-        dX = dout.dot(W.T)
+        self.dW = self.X.T.dot(dout)  # GD를 사용해서 W, b를 fitting할 때 사용
+        dX = dout.dot(self.W.T)
         return dX
 
 
