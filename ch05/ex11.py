@@ -1,4 +1,6 @@
 """2층 신경망 테스트"""
+import pickle
+
 import numpy as np
 import matplotlib.pyplot as plt
 from ch05.ex10_twolayer import TwoLayerNetwork
@@ -13,7 +15,7 @@ if __name__ == '__main__':
     neural_net = TwoLayerNetwork(784, 32, 10)
 
     epochs = 100  # 100번 반복
-    batch_size = 100  # 한번에 학습시키는 입력 데이터 개수
+    batch_size = 128  # 한번에 학습시키는 입력 데이터 개수
     learning_rate = 0.1
 
     iter_size = max(X_train.shape[0] // batch_size, 1)
@@ -76,4 +78,9 @@ if __name__ == '__main__':
     plt.ylabel('accuracy')
     plt.legend()
     plt.show()
+
+    # 신경망에서 학습이 모두 끝난 후 파라미터(가중치/편향 행렬)을 파일에 저장
+    # pickle 이용
+    with open('mnist_param.pkl', mode='wb') as f:
+        pickle.dump(neural_net.params, f)
 
