@@ -3,7 +3,7 @@
     AdaGrad + Momentum 알고리즘
     학습률 변화 + 속도(모멘텀) 개념 도입
     t: timestamp / 반복할 때마다 증가하는 숫자. update 메소드가 호출될 때마다 +1
-    beta1, beta2: 모멘텀을 변화시킬 때 사용하는 상수
+    beta1, beta2: 모멘텀을 변화시킬 때 사용하는 상수, 0 < beta < 1
     m: 1st momentum
     v: 2nd momentum
     m = beta1 * m + (1 - beta1) * grad
@@ -19,14 +19,12 @@ from ch06.ex01_matplot3d import fn, fn_derivative
 
 
 class Adam:
-    def __init__(self, lr=0.001, beta1=0.9, beta2=0.999):
+    def __init__(self, lr=0.01, beta1=0.9, beta2=0.99):
         self.lr = lr
         self.b1 = beta1
         self.b2 = beta2
         self.m = dict()
         self.v = dict()
-        self.m_hat = dict()
-        self.v_hat = dict()
         self.t = 0
 
     def update(self, params, grads, eps=1e-8):
@@ -44,9 +42,9 @@ class Adam:
         for key in params:
             self.m[key] = self.b1 * self.m[key] + (1 - self.b1) * grads[key]
             self.v[key] = self.b2 * self.v[key] + (1 - self.b2) * grads[key] * grads[key]
-            self.m_hat[key] = self.m[key] / (1 - self.b1**self.t)
-            self.v_hat[key] = self.v[key] / (1 - self.b2**self.t)
-            params[key] -= self.lr * self.m_hat[key] / (np.sqrt(self.v_hat[key]) + eps)
+            m_hat = self.m[key] / (1 - self.b1**self.t)
+            v_hat = self.v[key] / (1 - self.b2**self.t)
+            params[key] -= self.lr * m_hat / (np.sqrt(v_hat) + eps)
 
 
 if __name__ == '__main__':
@@ -57,7 +55,7 @@ if __name__ == '__main__':
     x_history = []
     y_history = []
 
-    for _ in range(100):
+    for _ in range(30):
         x_history.append(params['x'])
         y_history.append(params['y'])
         gradients['x'], gradients['y'] = fn_derivative(params['x'], params['y'])
@@ -71,7 +69,7 @@ if __name__ == '__main__':
     X, Y = np.meshgrid(x, y)
     Z = fn(X, Y)
 
-    mask = Z > 7
+    mask = Z > 8
     Z[mask] = 0
 
     plt.contour(X, Y, Z, 10)
