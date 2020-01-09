@@ -11,7 +11,7 @@ from ch06.ex05_adam import Adam
 from ch06.ex06_rmsprop import RMSProp
 from ch06.ex07_nesterov import Nesterov
 from dataset.mnist import load_mnist
-from ex04_adagrad import AdaGrad
+from ch06.ex04_adagrad import AdaGrad
 
 if __name__ == '__main__':
     # MNIST(손글씨 이미지) 데이터 로드
