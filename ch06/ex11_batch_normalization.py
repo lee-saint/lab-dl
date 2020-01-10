@@ -18,6 +18,7 @@ from common.multi_layer_net_extend import MultiLayerNetExtend
 from dataset.mnist import load_mnist
 
 if __name__ == '__main__':
+    np.random.seed(110)
     # p.213 그림 6-18을 그리시오
     # Batch Normalization을 사용하는 신경망과 사용하지 않는 신경망의 학습 속도 비교
 
@@ -25,13 +26,13 @@ if __name__ == '__main__':
     bn_neural_net = MultiLayerNetExtend(input_size=784,
                                         hidden_size_list=[100, 100, 100, 100, 100],
                                         output_size=10,
-                                        weight_init_std=0.1,
+                                        weight_init_std=0.01,
                                         use_batchnorm=True)
     # 배치 정규화를 사용하지 않는 신경망
     neural_net = MultiLayerNetExtend(input_size=784,
                                      hidden_size_list=[100, 100, 100, 100, 100],
                                      output_size=10,
-                                     weight_init_std=0.1,
+                                     weight_init_std=0.01,
                                      use_batchnorm=False)
 
     # MNIST 데이터 로드
@@ -40,21 +41,28 @@ if __name__ == '__main__':
     optimizer = Sgd(learning_rate=0.01)
 
     # 미니배치를 20번 학습시키면서 두 신경망에서 정확도(accuracy)를 기록
-    iterations = 20
+    iterations = 200
+    train_size = 1000
     batch_size = 128
     bn_acc = []
     acc = []
 
     for _ in range(iterations):
-        idx = np.random.choice(len(X_train), batch_size)
+        idx = np.random.choice(train_size, batch_size)
         X_batch = X_train[idx]
         Y_batch = Y_train[idx]
-        bn_grads = bn_neural_net.gradient(X_batch, Y_batch)
+
+        # 배치 정규화를 사용하지 않는 신경망 학습
         grads = neural_net.gradient(X_batch, Y_batch)
-        optimizer.update(bn_neural_net.params, bn_grads)
         optimizer.update(neural_net.params, grads)
-        bn_acc.append(bn_neural_net.accuracy(X_train, Y_train))
-        acc.append(neural_net.accuracy(X_train, Y_train))
+        a = neural_net.accuracy(X_train[np.arange(train_size)], Y_train[np.arange(train_size)])
+        acc.append(a)
+
+        # 배치 정규화를 사용하는 신경망 학습
+        bn_grads = bn_neural_net.gradient(X_batch, Y_batch)
+        optimizer.update(bn_neural_net.params, bn_grads)
+        bn_a = bn_neural_net.accuracy(X_train[np.arange(train_size)], Y_train[np.arange(train_size)])
+        bn_acc.append(bn_a)
 
         print(f'===== iteration {_+1} / {iterations} =====')
         print('BatchNorm:', bn_acc[-1])
