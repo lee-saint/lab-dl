@@ -38,6 +38,6 @@ if __name__ == '__main__':
     # (3, 3, 3) 필터
     filter = np.zeros((3, 3, 3))
     filter[1, 1, 0] = 1.0
-    transformed = correlate(img_pixel, filter, mode='same') / 255
-    plt.imshow(transformed)
+    transformed = correlate(img_pixel, filter, mode='same')
+    plt.imshow(transformed.astype(np.uint8))
     plt.show()
