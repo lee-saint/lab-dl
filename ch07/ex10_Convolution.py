@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from common.util import im2col
+from common.util import im2col, col2im
 from dataset.mnist import load_mnist
 
 
@@ -40,6 +40,19 @@ class Convolution:
         out = x_col.dot(w_col.T)
         out = out.reshape(n, oh, ow, -1).transpose(0, 3, 1, 2)
         return out
+
+    def backward(self, dout):
+        FN, C, FH, FW = self.W.shape
+        dout = dout.transpose(0, 2, 3, 1).reshape(-1, FN)
+
+        self.db = np.sum(dout, axis=0)
+        self.dW = np.dot(self.x_col.T, dout)
+        self.dW = self.dW.transpose(1, 0).reshape(FN, C, FH, FW)
+
+        dcol = np.dot(dout, self.W_col.T)
+        dx = col2im(dcol, self.x.shape, FH, FW, self.stride, self.pad)
+
+        return dx
 
 
 if __name__ == '__main__':
