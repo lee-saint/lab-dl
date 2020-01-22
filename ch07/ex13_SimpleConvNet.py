@@ -92,5 +92,5 @@ if __name__ == '__main__':
     for grad in grads:
         print(f'{grad} shape: {grads[grad].shape}')
 
-    trainer = Trainer(conv, x_train[:1000], y_train[:1000], x_test, y_test, optimizer='Adam')
+    trainer = Trainer(conv, x_train[:5000], y_train[:5000], x_test[:1000], y_test[:1000], optimizer='Adam', evaluate_sample_num_per_epoch=1000)
     trainer.train()
