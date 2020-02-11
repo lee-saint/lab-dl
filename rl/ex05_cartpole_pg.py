@@ -17,7 +17,7 @@ def play_one_step(env, obs, model, loss_fn):
         left_prob = model(obs[np.newaxis])  # 1D -> 2D
         action = (tf.random.uniform([1, 1]) > left_prob)  # boolean(T, F)
         y_target = tf.constant([[1.0]]) - tf.cast(action, tf.float32)
-        # y_target: 정책에서 결정된 값(1: 오른쪽 가속도, 0: 왼쪽 가속도)
+        # y_target: 신경망의 선택이 옳다(optimal)고 가정
         loss = tf.reduce_mean(loss_fn(y_target, left_prob))
     grads = tape.gradient(loss, model.trainable_variables)
     obs, reward, done, info = env.step(int(action[0, 0].numpy()))
@@ -52,6 +52,17 @@ def discount_rewards(rewards, discount_rate):
 
 
 def discount_normalize_rewards(all_rewards, discount_rate):
+    """
+    gamma: 할인율. 0 <= gamma <= 1
+        미래의 보상을 현재 보상에 얼마나 반영할지 결정하는 하이퍼파라미터
+    R(t): 현재(t 시점)에서의 예상되는 미래 수익
+    R(t) = r(t) + gamma * r(t+1) + gamma^2 * r(t+2) + ...
+        gamma = 1인 경우 미래의 모든 수익을 동등하게 고려
+        gamma = 0인 경우 미래 수익 고려 없고 현재 수익만 고려
+        0 < gamma < 1인 경우 미래의 몇 단계까지만 중요하게 고려
+    R(t) = r(t) + gamma * {r(t+1) + gamma * r(t+2) +  + gamma^2 * r(t+3)...}
+         = r(t) + gamma * R(t+1)
+    """
     all_dc_rewards = [discount_rewards(rewards, discount_rate) for rewards in all_rewards]
     # z = (x - mu) / sigma
     flat_rewards = np.concatenate(all_dc_rewards)  # 2D array -> 1D array
@@ -65,6 +76,7 @@ if __name__ == '__main__':
     discounted = discount_rewards(rewards, discount_rate=0.8)
     print(discounted)
 
+    # ragged matrix
     all_rewards = [
         [10, 0, -50],
         [10, 20]
